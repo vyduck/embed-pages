@@ -13,47 +13,47 @@ import {
     InteractionCollector,
 } from "discord.js";
 
-export class fieldPaginator {
+export class FieldPaginator {
     /** 
      * @private
      * @type {{name: String, value: String, inline: Boolean}[]} 
-     * */
+     */
     fields;
 
     /**
      * @private
      * @type {EmbedBuilder}
-     * */
-    baseEmbed;
+     */
+    embed;
 
     /**
      * @private 
      * @type {Number} 
-     * */
+     */
     fieldsPerPage;
 
     /**
      * @private 
-     * @type { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message} 
-     * */
+     * @type { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message } 
+     */
     context;
 
     /**
      * @private 
-     * @type {Number} 
-     * */
-    currentPageNumber = 0;
+     * @type { Number } 
+     */
+    crntPageIndex = 0;
 
     /**
      * @private 
-     * @type {Number} 
-     * */
-    maxPageNumber;
+     * @type { Number } 
+     */
+    maxPageIndex;
 
     /** 
      * @private
-     * @type {ButtonBuilder}
-     * */
+     * @type { ButtonBuilder }
+     */
     prevBtn = new ButtonBuilder()
         .setLabel("Previous")
         .setCustomId("prev")
@@ -61,8 +61,8 @@ export class fieldPaginator {
 
     /**
      * @private 
-     * @type {ButtonBuilder} 
-     * */
+     * @type { ButtonBuilder } 
+     */
     nextBtn = new ButtonBuilder()
         .setLabel("Next")
         .setCustomId("next")
@@ -70,8 +70,8 @@ export class fieldPaginator {
 
     /** 
      * @private
-     * @type {ActionRowBuilder}
-     * */
+     * @type { ActionRowBuilder }
+     */
     row = new ActionRowBuilder();
 
     /**
@@ -80,7 +80,7 @@ export class fieldPaginator {
      * @param { Object } options 
      * @param { EmbedBuilder } options.baseEmbed
      * @param { Number } options.fieldsPerPage
-     * @param { { name: String, value: String, inline?: Boolean }[] }
+     * @param { { name: String, value: String, inline?: Boolean }[] } options.fields
      */
     constructor(context, {
         baseEmbed,
@@ -93,14 +93,14 @@ export class fieldPaginator {
         this.context = context;
         this.fields = fields;
         this.fieldsPerPage = fieldsPerPage == 0 ? 5 : fieldsPerPage;
-        this.baseEmbed = baseEmbed ?? new EmbedBuilder();
+        this.embed = baseEmbed ?? new EmbedBuilder();
 
-        this.maxPageNumber = Math.ceil(this.fields.length / this.fieldsPerPage) - 1;
+        this.maxPageIndex = Math.ceil(this.fields.length / this.fieldsPerPage) - 1;
 
         this.update();
 
         this.context[this.context.deferred ? "editReply" : "reply"]({
-            embeds: [this.baseEmbed],
+            embeds: [this.embed],
             components: [this.row]
         }).then(async (message) => {
             const buttonCollector = new InteractionCollector(
@@ -114,17 +114,17 @@ export class fieldPaginator {
             buttonCollector.on("collect", async (interaction) => {
                 switch (interaction.customId) {
                     case "next":
-                        this.currentPageNumber += 1;
+                        this.crntPageIndex += 1;
                         break;
                     case "prev":
-                        this.currentPageNumber -= 1;
+                        this.crntPageIndex -= 1;
                         break
                 };
 
                 this.update();
 
                 interaction.update({
-                    embeds: [this.baseEmbed],
+                    embeds: [this.embed],
                     components: [this.row]
                 })
             })
@@ -135,20 +135,20 @@ export class fieldPaginator {
      * @private
      */
     update() {
-        this.baseEmbed.setFields();
+        this.embed.setFields();
         for (let i = 0; i < this.fieldsPerPage; i++) {
-            let field = this.fields[this.currentPageNumber * this.fieldsPerPage + i];
+            let field = this.fields[this.crntPageIndex * this.fieldsPerPage + i];
             if (field == undefined) break;
-            this.baseEmbed.addFields(field);
+            this.embed.addFields(field);
         };
-        this.baseEmbed.setFooter({
-            text: `${this.currentPageNumber+1}/${this.maxPageNumber+1}`
+        this.embed.setFooter({
+            text: `${this.crntPageIndex+1}/${this.maxPageIndex+1}`
         })
 
         this.prevBtn.setDisabled(false);
         this.nextBtn.setDisabled(false);
-        if (this.currentPageNumber == 0) this.prevBtn.setDisabled(true);
-        if (this.currentPageNumber == this.maxPageNumber) this.nextBtn.setDisabled(true);
+        if (this.crntPageIndex == 0) this.prevBtn.setDisabled(true);
+        if (this.crntPageIndex == this.maxPageIndex) this.nextBtn.setDisabled(true);
         this.row.setComponents(this.prevBtn, this.nextBtn);
     }
 }

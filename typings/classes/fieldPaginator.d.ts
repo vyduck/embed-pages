@@ -1,60 +1,65 @@
-export class fieldPaginator {
+export class FieldPaginator {
     /**
      *
      * @param { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message } context
      * @param { Object } options
      * @param { EmbedBuilder } options.baseEmbed
      * @param { Number } options.fieldsPerPage
-     * @param { { name: String, value: String, inline?: Boolean }[] }
+     * @param { { name: String, value: String, inline?: Boolean }[] } options.fields
      */
     constructor(context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message, { baseEmbed, fieldsPerPage, fields }: {
         baseEmbed: EmbedBuilder;
         fieldsPerPage: number;
+        fields: {
+            name: string;
+            value: string;
+            inline?: boolean;
+        }[];
     });
     /**
      * @private
      * @type {{name: String, value: String, inline: Boolean}[]}
-     * */
+     */
     private fields;
     /**
      * @private
      * @type {EmbedBuilder}
-     * */
-    private baseEmbed;
+     */
+    private embed;
     /**
      * @private
      * @type {Number}
-     * */
+     */
     private fieldsPerPage;
     /**
      * @private
-     * @type { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message}
-     * */
+     * @type { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message }
+     */
     private context;
     /**
      * @private
-     * @type {Number}
-     * */
-    private currentPageNumber;
+     * @type { Number }
+     */
+    private crntPageIndex;
     /**
      * @private
-     * @type {Number}
-     * */
-    private maxPageNumber;
+     * @type { Number }
+     */
+    private maxPageIndex;
     /**
      * @private
-     * @type {ButtonBuilder}
-     * */
+     * @type { ButtonBuilder }
+     */
     private prevBtn;
     /**
      * @private
-     * @type {ButtonBuilder}
-     * */
+     * @type { ButtonBuilder }
+     */
     private nextBtn;
     /**
      * @private
-     * @type {ActionRowBuilder}
-     * */
+     * @type { ActionRowBuilder }
+     */
     private row;
     /**
      * @private
