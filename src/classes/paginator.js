@@ -67,7 +67,7 @@ export class CustomPaginator {
      * @param { Object } options
      * @param { Object[] } options.items
      * @param { Function } options.pagemaker
-     * @param { any[] } options..args
+     * @param { any[] } options.args
      */
     constructor(context, {
         items = [], pagemaker = () => new EmbedBuilder(), args = []
