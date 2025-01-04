@@ -1,6 +1,6 @@
 {
   "name": "cdep",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "A module to display different pages on a discord embed.",
   "main": "src/index.js",
   "types": "typings/index.d.ts",

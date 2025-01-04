@@ -1,15 +1,15 @@
-import { 
-    ActionRowBuilder, 
-    ButtonBuilder, 
-    EmbedBuilder, 
-    ButtonStyle, 
+import {
+    ActionRowBuilder,
+    ButtonBuilder,
+    EmbedBuilder,
+    ButtonStyle,
 
-    Message, 
-    CommandInteraction, 
-    MessageComponentInteraction, 
-    ModalSubmitInteraction, 
-    
-    ComponentType, 
+    Message,
+    CommandInteraction,
+    MessageComponentInteraction,
+    ModalSubmitInteraction,
+
+    ComponentType,
     InteractionCollector,
 } from "discord.js";
 
@@ -97,38 +97,45 @@ export class FieldPaginator {
 
         this.maxPageIndex = Math.ceil(this.fields.length / this.fieldsPerPage) - 1;
 
+        this.init();
+    }
+
+    /**
+     * @private
+     */
+    async init() {
         this.update();
 
-        this.context[this.context.deferred ? "editReply" : "reply"]({
+        const message = await this.context[this.context.deferred ? "editReply" : "reply"]({
             embeds: [this.embed],
             components: [this.row]
-        }).then(async (message) => {
-            const buttonCollector = new InteractionCollector(
-                message.client,
-                {
-                    message,
-                    componentType: ComponentType.Button
-                }
-            );
+        })
 
-            buttonCollector.on("collect", async (interaction) => {
-                switch (interaction.customId) {
-                    case "next":
-                        this.crntPageIndex += 1;
-                        break;
-                    case "prev":
-                        this.crntPageIndex -= 1;
-                        break
-                };
+        const buttonCollector = new InteractionCollector(
+            message.client,
+            {
+                message,
+                componentType: ComponentType.Button
+            }
+        );
 
-                this.update();
+        buttonCollector.on("collect", async (interaction) => {
+            switch (interaction.customId) {
+                case "next":
+                    this.crntPageIndex += 1;
+                    break;
+                case "prev":
+                    this.crntPageIndex -= 1;
+                    break
+            };
 
-                interaction.update({
-                    embeds: [this.embed],
-                    components: [this.row]
-                })
+            this.update();
+
+            interaction.update({
+                embeds: [this.embed],
+                components: [this.row]
             })
-        });
+        })
     }
 
     /**
@@ -142,7 +149,7 @@ export class FieldPaginator {
             this.embed.addFields(field);
         };
         this.embed.setFooter({
-            text: `${this.crntPageIndex+1}/${this.maxPageIndex+1}`
+            text: `${this.crntPageIndex + 1}/${this.maxPageIndex + 1}`
         })
 
         this.prevBtn.setDisabled(false);

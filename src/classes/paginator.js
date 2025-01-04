@@ -78,36 +78,43 @@ export class CustomPaginator {
         this.pagemaker = pagemaker;
         this.args = args;
 
-        this.update();
+        this.init();
+    }
 
-        this.context[this.context.deferred ? "editReply" : "reply"]({
+    /**
+     * @private
+     */
+    async init() {
+        await this.update();
+
+        const message = await this.context[this.context.deferred ? "editReply" : "reply"]({
             embeds: [this.embed],
             components: [this.row]
-        }).then(async (message) => {
-            const btnCollector = new InteractionCollector(
-                message.client,
-                {
-                    message,
-                    componentType: ComponentType.Button
-                }
-            );
+        });
 
-            btnCollector.on("collect", async (interaction) => {
-                switch (interaction.customId) {
-                    case "next":
-                        this.crntPageIndex += 1;
-                        break;
-                    case "prev":
-                        this.crntPageIndex -= 1;
-                        break;
-                };
+        const btnCollector = new InteractionCollector(
+            message.client,
+            {
+                message,
+                componentType: ComponentType.Button
+            }
+        );
 
-                this.update();
+        btnCollector.on("collect", async (interaction) => {
+            switch (interaction.customId) {
+                case "next":
+                    this.crntPageIndex += 1;
+                    break;
+                case "prev":
+                    this.crntPageIndex -= 1;
+                    break;
+            };
 
-                interaction.update({
-                    embeds: [this.embed],
-                    components: [this.row]
-                });
+            await this.update();
+
+            await interaction.update({
+                embeds: [this.embed],
+                components: [this.row]
             });
         });
     }
@@ -115,8 +122,8 @@ export class CustomPaginator {
     /**
      * @private
      */
-    update() {
-        this.embed = this.pagemaker(this.items[this.crntPageIndex], ...this.args);
+    async update() {
+        this.embed = await this.pagemaker(this.items[this.crntPageIndex], ...this.args);
         this.embed.setFooter({
             text: `${this.crntPageIndex + 1}/${this.items.length}`
         });

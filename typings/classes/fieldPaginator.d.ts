@@ -20,53 +20,57 @@ export class FieldPaginator {
      * @private
      * @type {{name: String, value: String, inline: Boolean}[]}
      */
-    private fields;
+    private fields: { name: string; value: string; inline: boolean; }[];
     /**
      * @private
      * @type {EmbedBuilder}
      */
-    private embed;
+    private embed: EmbedBuilder;
     /**
      * @private
      * @type {Number}
      */
-    private fieldsPerPage;
+    private fieldsPerPage: number;
     /**
      * @private
      * @type { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message }
      */
-    private context;
+    private context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message;
     /**
      * @private
      * @type { Number }
      */
-    private crntPageIndex;
+    private crntPageIndex: number;
     /**
      * @private
      * @type { Number }
      */
-    private maxPageIndex;
+    private maxPageIndex: number;
     /**
      * @private
      * @type { ButtonBuilder }
      */
-    private prevBtn;
+    private prevBtn: ButtonBuilder;
     /**
      * @private
      * @type { ButtonBuilder }
      */
-    private nextBtn;
+    private nextBtn: ButtonBuilder;
     /**
      * @private
      * @type { ActionRowBuilder }
      */
-    private row;
+    private row: ActionRowBuilder;
+    /**
+     * @private
+     */
+    private init;
     /**
      * @private
      */
     private update;
 }
-import { CommandInteraction } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, CommandInteraction } from "discord.js";
 import { MessageComponentInteraction } from "discord.js";
 import { ModalSubmitInteraction } from "discord.js";
 import { Message } from "discord.js";
