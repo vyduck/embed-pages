@@ -1,4 +1,4 @@
-import { ComponentType, InteractionCollector } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, ComponentType, EmbedBuilder, InteractionCollector, Message, MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
 
 export class CustomPaginator {
     /**
@@ -13,7 +13,16 @@ export class CustomPaginator {
      */
     embed;
 
+    /**
+     * @private
+     * @type {Object[]}
+     */
     items;
+
+    /**
+     * @private
+     * @type {Function}
+     */
     pagemaker;
 
     /**
@@ -21,6 +30,12 @@ export class CustomPaginator {
      * @type {Number} 
      */
     crntPageIndex = 0;
+
+    /**
+     * @private
+     * @type {any[]}
+     */
+    args = [];
 
     /** 
      * @private
@@ -52,14 +67,16 @@ export class CustomPaginator {
      * @param { Object } options
      * @param { Object[] } options.items
      * @param { Function } options.pagemaker
+     * @param { any[] } options..args
      */
     constructor(context, {
-        items, pagemaker
+        items = [], pagemaker = () => new EmbedBuilder(), args = []
     }) {
         this.context = context;
 
         this.items = items;
         this.pagemaker = pagemaker;
+        this.args = args;
 
         this.update();
 
@@ -99,7 +116,7 @@ export class CustomPaginator {
      * @private
      */
     update() {
-        this.embed = this.pagemaker(this.items[this.crntPageIndex]);
+        this.embed = this.pagemaker(this.items[this.crntPageIndex], ...this.args);
         this.embed.setFooter({
             text: `${this.crntPageIndex + 1}/${this.items.length}`
         });

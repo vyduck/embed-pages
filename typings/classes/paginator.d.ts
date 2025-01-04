@@ -5,8 +5,9 @@ export class CustomPaginator {
      * @param { Object } options
      * @param { Object[] } options.items
      * @param { Function } options.pagemaker
+     * @param { any[] } options..args
      */
-    constructor(context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message, { items, pagemaker }: {
+    constructor(context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message, { items, pagemaker, args }: {
         items: any[];
         pagemaker: Function;
     });
@@ -20,13 +21,26 @@ export class CustomPaginator {
      * @type {EmbedBuilder}
      */
     private embed;
-    items: any[];
-    pagemaker: Function;
+    /**
+     * @private
+     * @type {Object[]}
+     */
+    private items;
+    /**
+     * @private
+     * @type {Function}
+     */
+    private pagemaker;
     /**
      * @private
      * @type {Number}
      */
     private crntPageIndex;
+    /**
+     * @private
+     * @type {any[]}
+     */
+    private args;
     /**
      * @private
      * @type {ButtonBuilder}
@@ -47,3 +61,7 @@ export class CustomPaginator {
      */
     private update;
 }
+import { CommandInteraction } from "discord.js";
+import { MessageComponentInteraction } from "discord.js";
+import { ModalSubmitInteraction } from "discord.js";
+import { Message } from "discord.js";
