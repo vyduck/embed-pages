@@ -102,9 +102,7 @@ export class CustomPaginator {
 
         const message = await this.context[this.context.deferred ? "editReply" : "reply"]({
             embeds: [this.embed],
-            components: [
-                customRow == undefined ? this.row : this.row, this.customRow
-            ]
+            components: this.customRow == undefined ? [this.row] : [this.row, this.customRow]
         });
 
         const btnCollector = new InteractionCollector(
@@ -123,13 +121,15 @@ export class CustomPaginator {
                 case "prev":
                     this.crntPageIndex -= 1;
                     break;
+                default:
+                    return;
             };
 
             await this.update();
 
             await interaction.update({
                 embeds: [this.embed],
-                components: [this.row]
+                components: this.customRow == undefined ? [this.row] : [this.row, this.customRow]
             });
         });
     }
@@ -139,7 +139,7 @@ export class CustomPaginator {
      */
     async update() {
         this.embed = await this.pagemaker(this.items[this.crntPageIndex], ...this.args);
-        this.customRow = await this.customRowMaker();
+        this.customRow = await this.customRowMaker(this.items[this.crntPageIndex], ...this.args);
 
         this.embed.setFooter({
             text: `${this.crntPageIndex + 1}/${this.items.length}`
