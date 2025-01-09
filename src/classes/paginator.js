@@ -9,21 +9,33 @@ export class CustomPaginator {
 
     /**
      * @private
+     * @type {Object[]}
+     */
+    items;
+    
+    /**
+     * @private
      * @type {EmbedBuilder}
      */
     embed;
 
     /**
      * @private
-     * @type {Object[]}
+     * @type {Function}
      */
-    items;
+    pagemaker;
+
+    /**
+     * @private
+     * @type {ActionRowBuilder}
+     */
+    customRow;
 
     /**
      * @private
      * @type {Function}
      */
-    pagemaker;
+    customRowMaker;
 
     /**
      * @private 
@@ -62,20 +74,21 @@ export class CustomPaginator {
     row = new ActionRowBuilder();
 
     /**
-     * 
      * @param { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message } context 
      * @param { Object } options
      * @param { Object[] } options.items
      * @param { Function } options.pagemaker
+     * @param { Function } options.customRowMaker
      * @param { any[] } options.args
      */
     constructor(context, {
-        items = [], pagemaker = () => new EmbedBuilder(), args = []
+        items = [], pagemaker = () => new EmbedBuilder(), args = [], rowmaker = () => undefined
     }) {
         this.context = context;
 
         this.items = items;
         this.pagemaker = pagemaker;
+        this.customRowMaker = rowmaker;
         this.args = args;
 
         this.init();
@@ -89,7 +102,9 @@ export class CustomPaginator {
 
         const message = await this.context[this.context.deferred ? "editReply" : "reply"]({
             embeds: [this.embed],
-            components: [this.row]
+            components: [
+                customRow == undefined ? this.row : this.row, this.customRow
+            ]
         });
 
         const btnCollector = new InteractionCollector(
@@ -124,6 +139,8 @@ export class CustomPaginator {
      */
     async update() {
         this.embed = await this.pagemaker(this.items[this.crntPageIndex], ...this.args);
+        this.customRow = await this.customRowMaker();
+
         this.embed.setFooter({
             text: `${this.crntPageIndex + 1}/${this.items.length}`
         });
