@@ -1,15 +1,16 @@
 export class CustomPaginator {
     /**
-     *
      * @param { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message } context
      * @param { Object } options
      * @param { Object[] } options.items
      * @param { Function } options.pagemaker
+     * @param { Function } options.customRowMaker
      * @param { any[] } options.args
      */
-    constructor(context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message, { items, pagemaker, args }: {
+    constructor(context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message, { items, pagemaker, args, customRowMaker }: {
         items: any[];
         pagemaker: Function;
+        customRowMaker: Function;
         args: any[];
     });
     /**
@@ -19,19 +20,29 @@ export class CustomPaginator {
     private context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message;
     /**
      * @private
-     * @type {EmbedBuilder}
-     */
-    private embed: EmbedBuilder;
-    /**
-     * @private
      * @type {Object[]}
      */
     private items: object[];
     /**
      * @private
+     * @type {EmbedBuilder}
+     */
+    private embed: EmbedBuilder;
+    /**
+     * @private
      * @type {Function}
      */
     private pagemaker: Function;
+    /**
+     * @private
+     * @type {ActionRowBuilder}
+     */
+    private customRow: ActionRowBuilder;
+    /**
+     * @private
+     * @type {Function}
+     */
+    private customRowMaker: Function;
     /**
      * @private
      * @type {Number}

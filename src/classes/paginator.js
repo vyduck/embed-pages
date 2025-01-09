@@ -82,13 +82,13 @@ export class CustomPaginator {
      * @param { any[] } options.args
      */
     constructor(context, {
-        items = [], pagemaker = () => new EmbedBuilder(), args = [], rowmaker = () => undefined
+        items = [], pagemaker = () => new EmbedBuilder(), args = [], customRowMaker = () => undefined
     }) {
         this.context = context;
 
         this.items = items;
         this.pagemaker = pagemaker;
-        this.customRowMaker = rowmaker;
+        this.customRowMaker = customRowMaker;
         this.args = args;
 
         this.init();
