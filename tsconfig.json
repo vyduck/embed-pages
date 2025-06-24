@@ -1,14 +1,18 @@
 {
-    "include": [
-        "**/*.js"
-    ],
-    "compilerOptions": {
-        "module": "NodeNext",
-        "declaration": true,
-        "emitDeclarationOnly": true,
-        "allowJs": true,
-        "target": "ES2024",
-        "moduleResolution": "nodenext",
-        "outDir": "typings"
-    }
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "outDir": "dist",
+    "declaration": true,
+    "declarationDir": "types",
+    "emitDeclarationOnly": false,
+    "rootDir": "src",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "allowUnusedLabels": false
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "types"]
 }

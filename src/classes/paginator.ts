@@ -1,89 +1,34 @@
+// @ts-nocheck
+// TODO: Remove this comment when the code is stable and tested
+
 import { ActionRowBuilder, ButtonBuilder, ButtonStyle, CommandInteraction, ComponentType, EmbedBuilder, InteractionCollector, Message, MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
 
 export class CustomPaginator {
-    /**
-     * @private 
-     * @type { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message } 
-     */
-    context;
+    context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message;
+    items: object[];
+    embed: EmbedBuilder;
+    pagemaker: Function;
+    customRow: ActionRowBuilder;
+    customRowMaker: Function;
 
-    /**
-     * @private
-     * @type {Object[]}
-     */
-    items;
-    
-    /**
-     * @private
-     * @type {EmbedBuilder}
-     */
-    embed;
-
-    /**
-     * @private
-     * @type {Function}
-     */
-    pagemaker;
-
-    /**
-     * @private
-     * @type {ActionRowBuilder}
-     */
-    customRow;
-
-    /**
-     * @private
-     * @type {Function}
-     */
-    customRowMaker;
-
-    /**
-     * @private 
-     * @type {Number} 
-     */
     crntPageIndex = 0;
-
-    /**
-     * @private
-     * @type {any[]}
-     */
     args = [];
 
-    /** 
-     * @private
-     * @type {ButtonBuilder}
-     */
-    prevBtn = new ButtonBuilder()
+    prevBtn: ButtonBuilder = new ButtonBuilder()
         .setLabel("Previous")
         .setCustomId("prev")
         .setStyle(ButtonStyle.Success);
 
-    /**
-     * @private 
-     * @type {ButtonBuilder} 
-     */
-    nextBtn = new ButtonBuilder()
+    nextBtn: ButtonBuilder = new ButtonBuilder()
         .setLabel("Next")
         .setCustomId("next")
         .setStyle(ButtonStyle.Success);
 
-    /** 
-     * @private
-     * @type {ActionRowBuilder}
-     */
     row = new ActionRowBuilder();
 
-    /**
-     * @param { CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message } context 
-     * @param { Object } options
-     * @param { Object[] } options.items
-     * @param { Function } options.pagemaker
-     * @param { Function } options.customRowMaker
-     * @param { any[] } options.args
-     */
-    constructor(context, {
+    constructor(context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message, {
         items = [], pagemaker = () => new EmbedBuilder(), args = [], customRowMaker = () => undefined
-    }) {
+    }: { items: object[]; pagemaker: Function; customRowMaker: Function; args: any[]; }) {
         this.context = context;
 
         this.items = items;
@@ -94,9 +39,6 @@ export class CustomPaginator {
         this.init();
     }
 
-    /**
-     * @private
-     */
     async init() {
         await this.update();
 
@@ -134,9 +76,6 @@ export class CustomPaginator {
         });
     }
 
-    /**
-     * @private
-     */
     async update() {
         this.embed = await this.pagemaker(this.items[this.crntPageIndex], ...this.args);
         this.customRow = await this.customRowMaker(this.items[this.crntPageIndex], ...this.args);
