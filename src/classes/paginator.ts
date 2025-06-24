@@ -14,15 +14,13 @@ export class CustomPaginator implements Paginator {
     pages: EmbedBuilder[] = [];
 
     constructor(context: Context, options: CustomPaginatorOptions) {
-
-        for (let item of options.items) {
-            (async () => {
-                const page = await options.pagemaker(item, ...options.args);
-                this.pages.push(page);
-            })()
-        }
-
-        this.init(context);
+        // Using async-then to handle asynchronous page creation
+        // This ensures that pages are created before initializing the paginator
+        (async () => {
+            for (let item of options.items) this.pages.push(await options.pagemaker(item, ...options.args));
+        })().then(() => {
+            this.init(context);
+        })
     }
 
     async init(context: Context) {

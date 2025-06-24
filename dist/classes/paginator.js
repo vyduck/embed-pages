@@ -5,13 +5,14 @@ export class CustomPaginator {
     crntPageIndex = 0;
     pages = [];
     constructor(context, options) {
-        for (let item of options.items) {
-            (async () => {
-                const page = await options.pagemaker(item, ...options.args);
-                this.pages.push(page);
-            })();
-        }
-        this.init(context);
+        // Using async-then to handle asynchronous page creation
+        // This ensures that pages are created before initializing the paginator
+        (async () => {
+            for (let item of options.items)
+                this.pages.push(await options.pagemaker(item, ...options.args));
+        })().then(() => {
+            this.init(context);
+        });
     }
     async init(context) {
         let message;

@@ -26,12 +26,12 @@ export function makeButtonRow(crntPage: number, totalPages: number) {
             new ButtonBuilder()
                 .setEmoji("⏮️")
                 .setCustomId("first")
-                .setDisabled(crntPage == 0)
+                .setDisabled(crntPage == 1)
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setEmoji("◀️")
                 .setCustomId("prev")
-                .setDisabled(crntPage == 0)
+                .setDisabled(crntPage == 1)
                 .setStyle(ButtonStyle.Primary),
             new ButtonBuilder()
                 .setLabel(`${crntPage}/${totalPages}`)
