@@ -1,9 +1,6 @@
 import {
-    ActionRowBuilder,
-    ButtonBuilder,
     EmbedBuilder,
-    ButtonStyle,
-
+    
     ComponentType,
     InteractionCollector,
     Message,
@@ -12,39 +9,14 @@ import {
     ButtonInteraction,
 } from "discord.js";
 
-import { Context, Paginator, PaginatorTypes } from "./basePaginator.js";
+import { Context, makeButtonRow, Paginator, PaginatorTypes } from "./basePaginator.js";
 
 export class FieldPaginator implements Paginator {
     type = PaginatorTypes.FieldPaginator;
     baseEmbed: EmbedBuilder;
 
     response: Message<boolean>;
-    context: Context;
-    buttonRow = new ActionRowBuilder<ButtonBuilder>()
-        .setComponents(
-            new ButtonBuilder()
-                .setEmoji("⏮️")
-                .setCustomId("first")
-                .setStyle(ButtonStyle.Danger),
-            new ButtonBuilder()
-                .setEmoji("◀️")
-                .setCustomId("prev")
-                .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-                .setLabel("/")
-                .setCustomId("currentPage")
-                .setStyle(ButtonStyle.Secondary),
-            new ButtonBuilder()
-                .setEmoji("▶️")
-                .setCustomId("next")
-                .setStyle(ButtonStyle.Success),
-            new ButtonBuilder()
-                .setEmoji("⏭️")
-                .setCustomId("last")
-                .setStyle(ButtonStyle.Danger)
-        );
-
-
+    
     pages: EmbedBuilder[] = [];
     crntPageIndex = 0;
 
@@ -56,7 +28,6 @@ export class FieldPaginator implements Paginator {
         fieldsPerPage = 5,
         fields
     }: { baseEmbed: EmbedBuilder; fieldsPerPage: number; fields: EmbedField[]; }) {
-        this.context = context;
         this.items = fields;
         this.fieldsPerPage = fieldsPerPage == 0 ? 5 : fieldsPerPage;
         this.baseEmbed = baseEmbed ?? new EmbedBuilder();
@@ -68,30 +39,29 @@ export class FieldPaginator implements Paginator {
             i++;
         }
 
-        this.init();
+        this.init(context);
     }
 
-    async init() {
-        this.update();
+    async init(context: Context) {
+        let message: Message;
 
         if ((
-            this.context.type === InteractionType.ApplicationCommand ||
-            this.context.type === InteractionType.MessageComponent ||
-            this.context.type === InteractionType.ModalSubmit
-
-        ) && this.context.deferred) this.response = await this.context.editReply({
-            embeds: [this.baseEmbed],
-            components: [this.buttonRow]
-        })
-        else this.response = await (this.context.reply as Function)({
-            embeds: [this.baseEmbed],
-            components: [this.buttonRow]
+            context.type === InteractionType.ApplicationCommand ||
+            context.type === InteractionType.MessageComponent ||
+            context.type === InteractionType.ModalSubmit
+        ) && context.deferred) message = await context.editReply({
+            embeds: [this.pages[this.crntPageIndex]],
+            components: [makeButtonRow(this.crntPageIndex + 1, this.pages.length)]
+        });
+        else message = await (context.reply as Function)({
+            embeds: [this.pages[this.crntPageIndex]],
+            components: [makeButtonRow(this.crntPageIndex + 1, this.pages.length)]
         });
 
         const buttonCollector = new InteractionCollector<ButtonInteraction>(
-            this.response.client,
+            message.client,
             {
-                message: this.response,
+                message,
                 componentType: ComponentType.Button,
             }
         );
@@ -112,39 +82,10 @@ export class FieldPaginator implements Paginator {
                     break;
             };
 
-            this.update();
-
             interaction.update({
                 embeds: [this.pages[this.crntPageIndex]],
-                components: [this.buttonRow]
+                components: [makeButtonRow(this.crntPageIndex + 1, this.pages.length)]
             })
         })
-    }
-
-    /**
-     * @private
-     */
-    update() {
-        for (let i = 0; i < this.fieldsPerPage; i++) {
-            let field = this.items[this.crntPageIndex * this.fieldsPerPage + i];
-            if (field == undefined) break;
-            this.baseEmbed.addFields(field);
-        };
-        this.baseEmbed.setFooter({
-            text: `${this.crntPageIndex + 1}/${this.pages.length}`
-        })
-
-        for (let i in this.buttonRow.components) this.buttonRow.components[i].setDisabled(false);
-
-        if (this.crntPageIndex == 0) {
-            this.buttonRow.components[0].setDisabled(true);
-            this.buttonRow.components[1].setDisabled(true);
-        }
-        if (this.crntPageIndex == this.pages.length - 1) {
-            this.buttonRow.components[3].setDisabled(true);
-            this.buttonRow.components[4].setDisabled(true);
-        }
-        this.buttonRow.components[2].setLabel(`${this.crntPageIndex + 1}/${this.pages.length}`);
-        this.buttonRow.components[2].setDisabled(true);
     }
 }

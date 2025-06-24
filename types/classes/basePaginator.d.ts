@@ -3,11 +3,6 @@ export interface Paginator {
     type: PaginatorTypes;
     pages: EmbedBuilder[];
     crntPageIndex: number;
-    items: object[];
-    context: Interaction | Message;
-    baseEmbed: EmbedBuilder;
-    buttonRow: ActionRowBuilder<ButtonBuilder>;
-    response: Message;
 }
 export interface PaginatorOptions {
     items: object[];
@@ -19,3 +14,4 @@ export declare enum PaginatorTypes {
     FieldPaginator = 0,
     CustomPaginator = 1
 }
+export declare function makeButtonRow(crntPage: number, totalPages: number): ActionRowBuilder<ButtonBuilder>;
