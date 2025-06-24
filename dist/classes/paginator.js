@@ -1,25 +1,32 @@
-// @ts-nocheck
-// TODO: Remove this comment when the code is stable and tested
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionCollector } from "discord.js";
+import { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionCollector, InteractionType } from "discord.js";
+import { PaginatorTypes } from "./basePaginator";
 export class CustomPaginator {
+    type = PaginatorTypes.CustomPaginator;
     context;
     items;
-    embed;
+    baseEmbed;
+    buttonRow = new ActionRowBuilder()
+        .setComponents(new ButtonBuilder()
+        .setEmoji("⏮️")
+        .setCustomId("first")
+        .setStyle(ButtonStyle.Danger), new ButtonBuilder()
+        .setEmoji("◀️")
+        .setCustomId("prev")
+        .setStyle(ButtonStyle.Success), new ButtonBuilder()
+        .setEmoji("▶️")
+        .setCustomId("next")
+        .setStyle(ButtonStyle.Success), new ButtonBuilder()
+        .setEmoji("⏭️")
+        .setCustomId("last")
+        .setStyle(ButtonStyle.Danger));
+    crntPageIndex = 0;
+    pages = [];
+    response;
     pagemaker;
     customRow;
     customRowMaker;
-    crntPageIndex = 0;
     args = [];
-    prevBtn = new ButtonBuilder()
-        .setLabel("Previous")
-        .setCustomId("prev")
-        .setStyle(ButtonStyle.Success);
-    nextBtn = new ButtonBuilder()
-        .setLabel("Next")
-        .setCustomId("next")
-        .setStyle(ButtonStyle.Success);
-    row = new ActionRowBuilder();
-    constructor(context, { items = [], pagemaker = () => new EmbedBuilder(), args = [], customRowMaker = () => undefined }) {
+    constructor(context, { items = [], pagemaker = (data) => new EmbedBuilder(), args = [], customRowMaker = () => undefined }) {
         this.context = context;
         this.items = items;
         this.pagemaker = pagemaker;
@@ -29,12 +36,20 @@ export class CustomPaginator {
     }
     async init() {
         await this.update();
-        const message = await this.context[this.context.deferred ? "editReply" : "reply"]({
-            embeds: [this.embed],
-            components: this.customRow == undefined ? [this.row] : [this.row, this.customRow]
-        });
-        const btnCollector = new InteractionCollector(message.client, {
-            message,
+        if ((this.context.type === InteractionType.ApplicationCommand ||
+            this.context.type === InteractionType.MessageComponent ||
+            this.context.type === InteractionType.ModalSubmit) && this.context.deferred)
+            this.response = await this.context.editReply({
+                embeds: [this.baseEmbed],
+                components: [this.buttonRow]
+            });
+        else
+            this.response = await this.context.reply({
+                embeds: [this.baseEmbed],
+                components: [this.buttonRow]
+            });
+        const btnCollector = new InteractionCollector(this.response.client, {
+            message: this.response,
             componentType: ComponentType.Button
         });
         btnCollector.on("collect", async (interaction) => {
@@ -45,29 +60,38 @@ export class CustomPaginator {
                 case "prev":
                     this.crntPageIndex -= 1;
                     break;
+                case "first":
+                    this.crntPageIndex = 0;
+                    break;
+                case "last":
+                    this.crntPageIndex = this.items.length - 1;
+                    break;
                 default:
                     return;
             }
             ;
             await this.update();
             await interaction.update({
-                embeds: [this.embed],
-                components: this.customRow == undefined ? [this.row] : [this.row, this.customRow]
+                embeds: [this.baseEmbed],
+                components: [this.buttonRow, this.customRow]
             });
         });
     }
     async update() {
-        this.embed = await this.pagemaker(this.items[this.crntPageIndex], ...this.args);
+        this.baseEmbed = await this.pagemaker(this.items[this.crntPageIndex], ...this.args);
         this.customRow = await this.customRowMaker(this.items[this.crntPageIndex], ...this.args);
-        this.embed.setFooter({
+        this.baseEmbed.setFooter({
             text: `${this.crntPageIndex + 1}/${this.items.length}`
         });
-        this.prevBtn.setDisabled(false);
-        this.nextBtn.setDisabled(false);
-        if (this.crntPageIndex == 0)
-            this.prevBtn.setDisabled(true);
-        if (this.crntPageIndex == this.items.length - 1)
-            this.nextBtn.setDisabled(true);
-        this.row.setComponents(this.prevBtn, this.nextBtn);
+        for (let i in this.buttonRow.components)
+            this.buttonRow.components[i].setDisabled(false);
+        if (this.crntPageIndex == 0) {
+            this.buttonRow.components[0].setDisabled(true);
+            this.buttonRow.components[1].setDisabled(true);
+        }
+        if (this.crntPageIndex == this.pages.length - 1) {
+            this.buttonRow.components[2].setDisabled(true);
+            this.buttonRow.components[3].setDisabled(true);
+        }
     }
 }

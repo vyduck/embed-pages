@@ -1,5 +1,5 @@
 import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, ButtonStyle, ComponentType, InteractionCollector, InteractionType, } from "discord.js";
-import { PaginatorTypes } from "./basePaginator";
+import { PaginatorTypes } from "./basePaginator.js";
 export class FieldPaginator {
     type = PaginatorTypes.FieldPaginator;
     baseEmbed;
@@ -7,21 +7,24 @@ export class FieldPaginator {
     context;
     buttonRow = new ActionRowBuilder()
         .setComponents(new ButtonBuilder()
-        .setEmoji(":track_previous:")
+        .setEmoji("⏮️")
         .setCustomId("first")
-        .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
-        .setEmoji(":arrow_backward:")
+        .setStyle(ButtonStyle.Danger), new ButtonBuilder()
+        .setEmoji("◀️")
         .setCustomId("prev")
+        .setStyle(ButtonStyle.Success), new ButtonBuilder()
+        .setLabel("/")
+        .setCustomId("currentPage")
         .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
-        .setEmoji(":arrow_forward:")
+        .setEmoji("▶️")
         .setCustomId("next")
-        .setStyle(ButtonStyle.Secondary), new ButtonBuilder()
-        .setEmoji(":track_next:")
+        .setStyle(ButtonStyle.Success), new ButtonBuilder()
+        .setEmoji("⏭️")
         .setCustomId("last")
-        .setStyle(ButtonStyle.Secondary));
-    items;
-    pages;
+        .setStyle(ButtonStyle.Danger));
+    pages = [];
     crntPageIndex = 0;
+    items;
     fieldsPerPage;
     constructor(context, { baseEmbed, fieldsPerPage = 5, fields }) {
         this.context = context;
@@ -62,11 +65,17 @@ export class FieldPaginator {
                 case "prev":
                     this.crntPageIndex -= 1;
                     break;
+                case "first":
+                    this.crntPageIndex = 0;
+                    break;
+                case "last":
+                    this.crntPageIndex = this.pages.length - 1;
+                    break;
             }
             ;
             this.update();
             interaction.update({
-                embeds: [this.baseEmbed],
+                embeds: [this.pages[this.crntPageIndex]],
                 components: [this.buttonRow]
             });
         });
@@ -75,7 +84,6 @@ export class FieldPaginator {
      * @private
      */
     update() {
-        this.baseEmbed.setFields();
         for (let i = 0; i < this.fieldsPerPage; i++) {
             let field = this.items[this.crntPageIndex * this.fieldsPerPage + i];
             if (field == undefined)
@@ -93,8 +101,10 @@ export class FieldPaginator {
             this.buttonRow.components[1].setDisabled(true);
         }
         if (this.crntPageIndex == this.pages.length - 1) {
-            this.buttonRow.components[2].setDisabled(true);
             this.buttonRow.components[3].setDisabled(true);
+            this.buttonRow.components[4].setDisabled(true);
         }
+        this.buttonRow.components[2].setLabel(`${this.crntPageIndex + 1}/${this.pages.length}`);
+        this.buttonRow.components[2].setDisabled(true);
     }
 }

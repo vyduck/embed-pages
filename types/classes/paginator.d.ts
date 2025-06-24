@@ -1,19 +1,21 @@
-import { ActionRowBuilder, ButtonBuilder, CommandInteraction, EmbedBuilder, Message, MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
-export declare class CustomPaginator {
-    context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message;
+import { ActionRowBuilder, ButtonBuilder, EmbedBuilder, Message, StringSelectMenuBuilder } from "discord.js";
+import { Context, Paginator, PaginatorTypes } from "./basePaginator";
+export declare class CustomPaginator implements Paginator {
+    type: PaginatorTypes;
+    context: Context;
     items: object[];
-    embed: EmbedBuilder;
-    pagemaker: Function;
-    customRow: ActionRowBuilder;
-    customRowMaker: Function;
+    baseEmbed: EmbedBuilder;
+    buttonRow: ActionRowBuilder<ButtonBuilder>;
     crntPageIndex: number;
+    pages: EmbedBuilder[];
+    response: Message;
+    pagemaker: (data: object, ...args: any[]) => Promise<EmbedBuilder> | EmbedBuilder;
+    customRow: ActionRowBuilder<ButtonBuilder | StringSelectMenuBuilder> | undefined;
+    customRowMaker: Function;
     args: any[];
-    prevBtn: ButtonBuilder;
-    nextBtn: ButtonBuilder;
-    row: ActionRowBuilder<import("discord.js").AnyComponentBuilder>;
-    constructor(context: CommandInteraction | MessageComponentInteraction | ModalSubmitInteraction | Message, { items, pagemaker, args, customRowMaker }: {
+    constructor(context: Context, { items, pagemaker, args, customRowMaker }: {
         items: object[];
-        pagemaker: Function;
+        pagemaker: (data: object) => Promise<EmbedBuilder> | EmbedBuilder;
         customRowMaker: Function;
         args: any[];
     });

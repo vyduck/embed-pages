@@ -16,5 +16,6 @@ export interface PaginatorOptions {
 }
 export type Context = Exclude<Interaction, AutocompleteInteraction> | Message;
 export declare enum PaginatorTypes {
-    FieldPaginator = 0
+    FieldPaginator = 0,
+    CustomPaginator = 1
 }
